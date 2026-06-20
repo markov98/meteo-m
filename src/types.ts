@@ -20,6 +20,7 @@ export interface OpenMeteoWeatherCurrent {
   temperature: number;
   windspeed?: number;
   winddirection?: number;
+  weathercode?: number;
   time?: string;
 }
 
@@ -33,6 +34,7 @@ export interface OpenMeteoDaily {
   temperature_2m_max?: number[];
   temperature_2m_min?: number[];
   precipitation_sum?: number[];
+  weathercode?: number[];
 }
 
 export interface OpenMeteoWeatherResponse {
@@ -46,12 +48,14 @@ export interface DailyForecast {
   tempMax: number | null;
   tempMin: number | null;
   precipitation: number | null;
+  weatherCode?: number | null;
 }
 
 export interface WeatherData {
   temperature: number | null;
   windspeed: number | null;
   winddirection: number | null;
+  weatherCode: number | null;
   precipitation: number | null;
   time: string | null;
   forecast: DailyForecast[];

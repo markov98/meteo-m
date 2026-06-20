@@ -2,7 +2,26 @@ import { useState, useEffect } from 'react';
 import { searchLocations } from './services/locationService';
 import { getCurrentWeather } from './services/weatherService';
 import type { CityLocation, WeatherData } from './types';
+import Forecast from './components/Forecast';
 import './App.css';
+
+function weatherCodeToEmoji(code?: number | null): string {
+  if (code == null) return '❓';
+
+  // Open-Meteo / WMO weather codes mapping
+  if (code === 0) return '☀️';
+  if (code === 1) return '🌤️';
+  if (code === 2) return '⛅';
+  if (code === 3) return '☁️';
+  if (code === 45 || code === 48) return '🌫️';
+  if (code >= 51 && code <= 57) return '🌦️';
+  if (code >= 61 && code <= 67) return '🌧️';
+  if (code >= 71 && code <= 77) return '❄️';
+  if (code >= 80 && code <= 86) return '🌦️';
+  if (code >= 95 && code <= 99) return '⛈️';
+
+  return '🌈';
+}
 
 function App() {
   const [query, setQuery] = useState('');
@@ -137,6 +156,7 @@ function App() {
           <section className="weather-section">
             <h2>Weather for {selectedLocation.name}</h2>
             <p>
+              <span className="weather-emoji">{weatherCodeToEmoji(weather.weatherCode)}</span>
               <span className="weather-value">{weather.temperature ?? 'N/A'}°C</span> — current temperature
             </p>
             <p>
@@ -153,33 +173,7 @@ function App() {
             </p>
           </section>
 
-          {weather.forecast.length > 0 && (
-            <section className="forecast-section">
-              <h2>5-day forecast</h2>
-              <div className="forecast-grid">
-                {weather.forecast.map((day) => (
-                  <article key={day.date} className="forecast-card">
-                    <p className="forecast-date">
-                      {new Date(day.date).toLocaleDateString(undefined, {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </p>
-                    <p>
-                      High: <span className="weather-value">{day.tempMax ?? 'N/A'}°C</span>
-                    </p>
-                    <p>
-                      Low: <span className="weather-value">{day.tempMin ?? 'N/A'}°C</span>
-                    </p>
-                    <p>
-                      Rain: <span className="weather-value">{day.precipitation ?? 0} mm</span>
-                    </p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          )}
+          <Forecast forecast={weather.forecast} />
         </>
       )}
     </div>
