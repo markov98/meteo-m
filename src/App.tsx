@@ -92,6 +92,13 @@ function App() {
 
   return (
     <div className="app-container">
+      <header>
+        <div className="title-row">
+          <h1>Meteo-M</h1>
+        </div>
+        <p className="subtitle">A simple weather app with search and browser location.</p>
+      </header>
+
       <section className="search-section">
         <input
           type="text"
@@ -102,7 +109,7 @@ function App() {
         <button type="button" onClick={handleSearch} disabled={loading}>
           Search
         </button>
-        <button type="button" onClick={requestLocation} disabled={loading} style={{ marginLeft: 8 }}>
+        <button type="button" onClick={requestLocation} disabled={loading}>
           Use my location
         </button>
       </section>
@@ -128,10 +135,18 @@ function App() {
       {weather && selectedLocation && (
         <section className="weather-section">
           <h2>Weather for {selectedLocation.name}</h2>
-          <p>Temperature: {weather.temperature ?? 'N/A'}°C</p>
-          <p>Wind speed: {weather.windspeed ?? 'N/A'} km/h</p>
-          <p>Wind direction: {weather.winddirection ?? 'N/A'}°</p>
-          <p>Time: {weather.time ?? 'N/A'}</p>
+          <p>
+            <span className="weather-value">{weather.temperature ?? 'N/A'}°C</span> — current temperature
+          </p>
+          <p>
+            Wind speed: <span className="weather-value">{weather.windspeed ?? 'N/A'} km/h</span>
+          </p>
+          <p>
+            Wind direction: <span className="weather-value">{weather.winddirection ?? 'N/A'}°</span>
+          </p>
+          <p>
+            Time: <span className="weather-value">{weather.time ?? 'N/A'}</span>
+          </p>
         </section>
       )}
     </div>
