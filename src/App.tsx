@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { searchLocations } from './services/locationService';
 import { getCurrentWeather } from './services/weatherService';
 import type { CityLocation, WeatherData } from './types';
@@ -11,6 +11,11 @@ function App() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Request the user's location on initial load
+    requestLocation();
+  }, []);
 
   const handleSearch = async () => {
     if (!query.trim()) {
@@ -53,6 +58,38 @@ function App() {
     }
   };
 
+  const requestLocation = () => {
+    if (!('geolocation' in navigator)) {
+      setError('Geolocation not supported by this browser.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const weatherData = await getCurrentWeather(latitude, longitude);
+          setWeather(weatherData);
+          setSelectedLocation({ id: 'me', name: 'My location', country: '', latitude, longitude });
+        } catch (err) {
+          setError('Failed to load weather for your location.');
+        } finally {
+          setLoading(false);
+        }
+      },
+      (err) => {
+        console.error('Geolocation error:', err);
+        setLoading(false);
+        setError('Unable to determine location. Use search instead.');
+      },
+      // Relax options for desktop environments: lower accuracy, longer timeout, allow cached positions
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
+    );
+  };
+
   return (
     <div className="app-container">
       <section className="search-section">
@@ -64,6 +101,9 @@ function App() {
         />
         <button type="button" onClick={handleSearch} disabled={loading}>
           Search
+        </button>
+        <button type="button" onClick={requestLocation} disabled={loading} style={{ marginLeft: 8 }}>
+          Use my location
         </button>
       </section>
 
