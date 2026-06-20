@@ -177,3 +177,42 @@ header {
     justify-content: center;
   }
 }
+
+.forecast-section {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.forecast-card {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.forecast-date {
+  margin: 0 0 0.75rem;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .forecast-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .forecast-grid {
+    grid-template-columns: 1fr;
+  }
+}

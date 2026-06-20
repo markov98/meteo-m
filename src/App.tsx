@@ -133,21 +133,54 @@ function App() {
       )}
 
       {weather && selectedLocation && (
-        <section className="weather-section">
-          <h2>Weather for {selectedLocation.name}</h2>
-          <p>
-            <span className="weather-value">{weather.temperature ?? 'N/A'}°C</span> — current temperature
-          </p>
-          <p>
-            Wind speed: <span className="weather-value">{weather.windspeed ?? 'N/A'} km/h</span>
-          </p>
-          <p>
-            Wind direction: <span className="weather-value">{weather.winddirection ?? 'N/A'}°</span>
-          </p>
-          <p>
-            Time: <span className="weather-value">{weather.time ?? 'N/A'}</span>
-          </p>
-        </section>
+        <>
+          <section className="weather-section">
+            <h2>Weather for {selectedLocation.name}</h2>
+            <p>
+              <span className="weather-value">{weather.temperature ?? 'N/A'}°C</span> — current temperature
+            </p>
+            <p>
+              Wind speed: <span className="weather-value">{weather.windspeed ?? 'N/A'} km/h</span>
+            </p>
+            <p>
+              Wind direction: <span className="weather-value">{weather.winddirection ?? 'N/A'}°</span>
+            </p>
+            <p>
+              Rain: <span className="weather-value">{weather.precipitation ?? 0} mm</span>
+            </p>
+            <p>
+              Time: <span className="weather-value">{weather.time ?? 'N/A'}</span>
+            </p>
+          </section>
+
+          {weather.forecast.length > 0 && (
+            <section className="forecast-section">
+              <h2>5-day forecast</h2>
+              <div className="forecast-grid">
+                {weather.forecast.map((day) => (
+                  <article key={day.date} className="forecast-card">
+                    <p className="forecast-date">
+                      {new Date(day.date).toLocaleDateString(undefined, {
+                        weekday: 'short',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </p>
+                    <p>
+                      High: <span className="weather-value">{day.tempMax ?? 'N/A'}°C</span>
+                    </p>
+                    <p>
+                      Low: <span className="weather-value">{day.tempMin ?? 'N/A'}°C</span>
+                    </p>
+                    <p>
+                      Rain: <span className="weather-value">{day.precipitation ?? 0} mm</span>
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+        </>
       )}
     </div>
   );
