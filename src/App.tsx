@@ -155,8 +155,8 @@ function App() {
         <>
           <section className="weather-section">
             <h2>Weather for {selectedLocation.name}</h2>
+            <p className="weather-emoji-large">{weatherCodeToEmoji(weather.weatherCode)}</p>
             <p>
-              <span className="weather-emoji">{weatherCodeToEmoji(weather.weatherCode)}</span>
               <span className="weather-value">{weather.temperature ?? 'N/A'}°C</span> — current temperature
             </p>
             <p>
@@ -176,6 +176,8 @@ function App() {
           <Forecast forecast={weather.forecast} />
         </>
       )}
+
+      <footer className="app-footer">App by Martin Markov</footer>
     </div>
   );
 }

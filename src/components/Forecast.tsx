@@ -1,4 +1,3 @@
-import React from 'react';
 import type { DailyForecast } from '../types';
 
 interface Props {

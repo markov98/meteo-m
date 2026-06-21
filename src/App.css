@@ -166,20 +166,37 @@ header {
   color: #38bdf8;
 }
 
-.weather-emoji {
-  font-size: 1.4rem;
-  margin-right: 0.5rem;
+.weather-emoji-large {
+  font-size: 2.4rem;
+  margin: 0.5rem 0 0.75rem;
+  display: inline-block;
 }
 
 @media (max-width: 640px) {
   .search-section {
     flex-direction: column;
     align-items: stretch;
+    justify-content: center;
+  }
+
+  .search-section {
+    gap: 0.5rem;
+  }
+
+  .search-section input {
+    flex: 0;
+    line-height: 1;
+    border-radius: 0.6rem;
   }
 
   .search-section button {
     width: 100%;
     justify-content: center;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.95rem;
+    height: 38px;
+    line-height: 1;
+    border-radius: 0.6rem;
   }
 }
 
@@ -219,5 +236,18 @@ header {
 @media (max-width: 640px) {
   .forecast-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+.app-footer {
+  margin-top: 1rem;
+  text-align: right;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .app-footer {
+    text-align: center;
   }
 }
