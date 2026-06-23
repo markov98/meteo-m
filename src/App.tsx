@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { searchLocations } from './services/locationService';
 import { getCurrentWeather } from './services/weatherService';
+import { getIpLocation } from './services/ipGeolocation';
 import type { CityLocation, WeatherData } from './types';
 import Forecast from './components/Forecast';
 import './App.css';
@@ -35,6 +36,21 @@ function App() {
     // Request the user's location on initial load
     requestLocation();
   }, []);
+
+  const loadWeatherForCoords = async (latitude: number, longitude: number, nameLabel = 'My location') => {
+    setLoading(true);
+    setError('');
+    try {
+      const weatherData = await getCurrentWeather(latitude, longitude);
+      setWeather(weatherData);
+      setSelectedLocation({ id: 'me', name: nameLabel, country: '', latitude, longitude });
+    } catch (err) {
+      setError('Failed to load weather for your location.');
+      setWeather(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = async () => {
     if (!query.trim()) {
@@ -78,35 +94,45 @@ function App() {
   };
 
   const requestLocation = () => {
-    if (!('geolocation' in navigator)) {
-      setError('Geolocation not supported by this browser.');
+    // Try browser geolocation first.
+    if ('geolocation' in navigator) {
+      setLoading(true);
+      setError('');
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const { latitude, longitude } = pos.coords;
+          await loadWeatherForCoords(latitude, longitude, 'My location');
+        },
+        async (err) => {
+          console.error('Geolocation error:', err);
+          // Try IP-based fallback
+          const ipLoc = await getIpLocation();
+          if (ipLoc) {
+            await loadWeatherForCoords(ipLoc.latitude, ipLoc.longitude, ipLoc.city ? `${ipLoc.city}` : 'My location (IP)');
+          } else {
+            setLoading(false);
+            setError('Unable to determine location. Use search instead.');
+          }
+        },
+        // Relax options for desktop environments: lower accuracy, longer timeout, allow cached positions
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+      );
       return;
     }
 
-    setLoading(true);
-    setError('');
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        try {
-          const weatherData = await getCurrentWeather(latitude, longitude);
-          setWeather(weatherData);
-          setSelectedLocation({ id: 'me', name: 'My location', country: '', latitude, longitude });
-        } catch (err) {
-          setError('Failed to load weather for your location.');
-        } finally {
-          setLoading(false);
-        }
-      },
-      (err) => {
-        console.error('Geolocation error:', err);
+    // If browser geolocation is not available, fall back to IP-based lookup
+    (async () => {
+      setLoading(true);
+      setError('');
+      const ipLoc = await getIpLocation();
+      if (ipLoc) {
+        await loadWeatherForCoords(ipLoc.latitude, ipLoc.longitude, ipLoc.city ? `${ipLoc.city}` : 'My location (IP)');
+      } else {
         setLoading(false);
-        setError('Unable to determine location. Use search instead.');
-      },
-      // Relax options for desktop environments: lower accuracy, longer timeout, allow cached positions
-      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
-    );
+        setError('Geolocation not supported by this browser. Use search instead.');
+      }
+    })();
   };
 
   return (
