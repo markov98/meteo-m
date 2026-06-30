@@ -91,6 +91,7 @@ header {
 }
 
 .theme-toggle-button {
+  justify-content: center;
   white-space: nowrap;
   min-width: 120px;
 }
