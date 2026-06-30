@@ -6,13 +6,17 @@ export async function getIpLocation(): Promise<{
   country?: string;
 } | null> {
   try {
-    // Using ipapi.co which doesn't require an API key for basic info
-    const resp = await fetch('https://ipapi.co/json/');
+    const resp = await fetch('https://ipwho.is/');
     if (!resp.ok) return null;
     const data = await resp.json();
 
-    const latitude = Number(data.latitude ?? data.lat);
-    const longitude = Number(data.longitude ?? data.lon ?? data.lon);
+    if (!data.success) {
+      console.error('IP geolocation service failed:', data);
+      return null;
+    }
+
+    const latitude = Number(data.latitude);
+    const longitude = Number(data.longitude);
 
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       return null;
@@ -23,7 +27,7 @@ export async function getIpLocation(): Promise<{
       longitude,
       city: data.city,
       region: data.region,
-      country: data.country_name ?? data.country,
+      country: data.country,
     };
   } catch (err) {
     console.error('IP geolocation error:', err);

@@ -1,153 +1,23 @@
-import { useState, useEffect } from 'react';
-import { searchLocations } from './services/locationService';
-import { getCurrentWeather } from './services/weatherService';
-import { getIpLocation } from './services/ipGeolocation';
-import type { CityLocation, WeatherData } from './types';
 import Forecast from './components/Forecast';
+import { useTheme } from './hooks/useTheme';
+import { useWeather } from './hooks/useWeather';
+import { weatherCodeToEmoji } from './utils/weatherEmoji';
 import './App.css';
 
-function weatherCodeToEmoji(code?: number | null): string {
-  if (code == null) return '❓';
-
-  // Open-Meteo / WMO weather codes mapping
-  if (code === 0) return '☀️';
-  if (code === 1) return '🌤️';
-  if (code === 2) return '⛅';
-  if (code === 3) return '☁️';
-  if (code === 45 || code === 48) return '🌫️';
-  if (code >= 51 && code <= 57) return '🌦️';
-  if (code >= 61 && code <= 67) return '🌧️';
-  if (code >= 71 && code <= 77) return '❄️';
-  if (code >= 80 && code <= 86) return '🌦️';
-  if (code >= 95 && code <= 99) return '⛈️';
-
-  return '🌈';
-}
-
 function App() {
-  const [query, setQuery] = useState('');
-  const [locations, setLocations] = useState<CityLocation[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<CityLocation | null>(null);
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof window === 'undefined') return 'dark';
-    const stored = localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'dark') return stored;
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  });
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
-    requestLocation();
-  }, []);
-
-  const toggleTheme = () => {
-    setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
-  };
-
-  const loadWeatherForCoords = async (latitude: number, longitude: number, nameLabel = 'My location') => {
-    setLoading(true);
-    setError('');
-    try {
-      const weatherData = await getCurrentWeather(latitude, longitude);
-      setWeather(weatherData);
-      setSelectedLocation({ id: 'me', name: nameLabel, country: '', latitude, longitude });
-    } catch (err) {
-      setError('Failed to load weather for your location.');
-      setWeather(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = async () => {
-    if (!query.trim()) {
-      setError('Type a city name first.');
-      return;
-    }
-
-    setError('');
-    setLoading(true);
-    setWeather(null);
-    setSelectedLocation(null);
-
-    try {
-      const results = await searchLocations(query.trim());
-      setLocations(results);
-      if (results.length === 0) {
-        setError('No matching locations found.');
-      }
-    } catch (err) {
-      setError('Failed to search locations.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSelectLocation = async (location: CityLocation) => {
-    setError('');
-    setLoading(true);
-    setSelectedLocation(location);
-
-    try {
-      const weatherData = await getCurrentWeather(location.latitude, location.longitude);
-      console.log('Fetched weather data:', weatherData);
-      setWeather(weatherData);
-    } catch (err) {
-      setError('Failed to load weather.');
-      setWeather(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const requestLocation = () => {
-    // Try browser geolocation first.
-    if ('geolocation' in navigator) {
-      setLoading(true);
-      setError('');
-
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const { latitude, longitude } = pos.coords;
-          await loadWeatherForCoords(latitude, longitude, 'My location');
-        },
-        async (err) => {
-          console.error('Geolocation error:', err);
-          // Try IP-based fallback
-          const ipLoc = await getIpLocation();
-          if (ipLoc) {
-            await loadWeatherForCoords(ipLoc.latitude, ipLoc.longitude, ipLoc.city ? `${ipLoc.city}` : 'My location (IP)');
-          } else {
-            setLoading(false);
-            setError('Unable to determine location. Use search instead.');
-          }
-        },
-        // Relax options for desktop environments: lower accuracy, longer timeout, allow cached positions
-        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
-      );
-      return;
-    }
-
-    // If browser geolocation is not available, fall back to IP-based lookup
-    (async () => {
-      setLoading(true);
-      setError('');
-      const ipLoc = await getIpLocation();
-      if (ipLoc) {
-        await loadWeatherForCoords(ipLoc.latitude, ipLoc.longitude, ipLoc.city ? `${ipLoc.city}` : 'My location (IP)');
-      } else {
-        setLoading(false);
-        setError('Geolocation not supported by this browser. Use search instead.');
-      }
-    })();
-  };
+  const { theme, toggleTheme } = useTheme();
+  const {
+    query,
+    setQuery,
+    locations,
+    selectedLocation,
+    weather,
+    loading,
+    error,
+    handleSearch,
+    handleSelectLocation,
+    requestLocation,
+  } = useWeather();
 
   return (
     <div className={`app-container ${theme}`}>
@@ -186,7 +56,8 @@ function App() {
             {locations.map((location) => (
               <li key={location.id}>
                 <button type="button" onClick={() => handleSelectLocation(location)}>
-                  {location.name}, {location.admin1 ? `${location.admin1}, ` : ''}{location.country}
+                  {location.name}, {location.admin1 ? `${location.admin1}, ` : ''}
+                  {location.country}
                 </button>
               </li>
             ))}
