@@ -24,6 +24,7 @@ export function useWeather() {
   const loadWeatherForCoords = async (latitude: number, longitude: number, nameLabel = 'My location') => {
     setLoading(true);
     setError('');
+    setLocations([]);
 
     try {
       const weatherData = await getCurrentWeather(latitude, longitude);
@@ -64,6 +65,7 @@ export function useWeather() {
   const handleSelectLocation = async (location: CityLocation) => {
     setError('');
     setLoading(true);
+    setLocations([]);
     setSelectedLocation(location);
 
     try {
@@ -81,6 +83,7 @@ export function useWeather() {
     if ('geolocation' in navigator) {
       setLoading(true);
       setError('');
+      setLocations([]);
 
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
