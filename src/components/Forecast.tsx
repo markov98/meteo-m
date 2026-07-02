@@ -1,4 +1,5 @@
 import type { DailyForecast } from '../types';
+import { weatherCodeToEmoji } from '../utils/weatherEmoji';
 
 interface Props {
   forecast: DailyForecast[];
@@ -19,6 +20,9 @@ export default function Forecast({ forecast }: Props) {
                 month: 'short',
                 day: 'numeric',
               })}
+            </p>
+            <p style={{ fontSize: '1.8rem', margin: '0.5rem 0', textAlign: 'center' }}>
+              {weatherCodeToEmoji(day.weatherCode)}
             </p>
             <p>
               High: <span className="weather-value">{day.tempMax ?? 'N/A'}°C</span>

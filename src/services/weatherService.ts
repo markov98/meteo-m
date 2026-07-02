@@ -27,7 +27,8 @@ function getCurrentPrecipitation(data: OpenMeteoWeatherResponse | null): number 
     return data.hourly.precipitation[0] ?? null;
   }
 
-  const currentIndex = data.hourly.time.indexOf(currentTime);
+  const currentHour = currentTime.substring(0, 13) + ':00';
+  const currentIndex = data.hourly.time.indexOf(currentHour);
   if (currentIndex !== -1) {
     return data.hourly.precipitation[currentIndex] ?? null;
   }
